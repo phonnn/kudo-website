@@ -52,6 +52,20 @@ export class MockApiClient implements ApiClient {
     return { spent: 100 - this.remaining, remaining: this.remaining, total: 100 };
   }
 
+  async getPointBalance() {
+    await delay(180);
+    return { earned: 340, lifetimeEarned: 575, lifetimeRedeemed: 235 };
+  }
+
+  async getRedemptionHistory() {
+    await delay(260);
+    return [
+      { id: "r1", rewardName: "$10 Coffee voucher", points: 100, status: "fulfilled" as const, redeemedAt: new Date(Date.now() - 5 * 86_400_000).toISOString() },
+      { id: "r2", rewardName: "Team lunch credit", points: 75, status: "pending" as const, redeemedAt: new Date(Date.now() - 16 * 86_400_000).toISOString() },
+      { id: "r3", rewardName: "Charity donation", points: 60, status: "fulfilled" as const, redeemedAt: new Date(Date.now() - 42 * 86_400_000).toISOString() },
+    ];
+  }
+
   async getFeed() {
     await delay(350);
     return { items: [...this.feed] };

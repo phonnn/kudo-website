@@ -20,6 +20,20 @@ export type BudgetView = {
   total: number;
 };
 
+export type PointBalanceView = {
+  earned: number;
+  lifetimeEarned: number;
+  lifetimeRedeemed: number;
+};
+
+export type RedemptionView = {
+  id: string;
+  rewardName: string;
+  points: number;
+  status: "pending" | "fulfilled" | "cancelled";
+  redeemedAt: string;
+};
+
 export type SendKudoCommand = {
   recipientId: string;
   message: string;
