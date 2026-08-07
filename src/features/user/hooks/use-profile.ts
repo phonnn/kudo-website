@@ -7,6 +7,13 @@ export function useProfile() {
   const api = useApi();
   const user = useQuery({ queryKey: ["me"], queryFn: () => api.getMe() });
   const points = useQuery({ queryKey: ["points", "me"], queryFn: () => api.getPointBalance() });
-  const redemptions = useQuery({ queryKey: ["redemptions", "me"], queryFn: () => api.getRedemptionHistory() });
-  return { user, points, redemptions };
+  const redemptions = useQuery({
+    queryKey: ["redemptions", "me"],
+    queryFn: () => api.getRedemptionHistory(),
+  });
+  const history = useQuery({
+    queryKey: ["point-history", "me"],
+    queryFn: () => api.getPointHistory(),
+  });
+  return { user, points, redemptions, history };
 }
