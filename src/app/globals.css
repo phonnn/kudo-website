@@ -451,16 +451,6 @@ footer {
   background: var(--theme-surface-subtle);
   color: var(--theme-text);
 }
-.new-posts {
-  width: 100%;
-  margin-bottom: 12px;
-  border: 1px solid var(--theme-border-strong);
-  border-radius: 9px;
-  background: var(--theme-success-surface);
-  color: var(--theme-success);
-  padding: 11px;
-  font-weight: 800;
-}
 .comments {
   border-top: 1px solid var(--theme-border);
   margin-top: 10px;
@@ -483,6 +473,13 @@ footer {
 .comment p {
   margin: 3px 0;
   font: 14px Arial;
+}
+.comments-more {
+  margin: 0 0 14px 41px;
+  padding: 0;
+  color: var(--theme-primary);
+  font-size: 13px;
+  font-weight: 700;
 }
 .comments form {
   display: grid;

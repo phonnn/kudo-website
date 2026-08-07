@@ -81,7 +81,7 @@ const initialFeed: FeedPostView[] = [
     tag: "ownership",
     createdAt: new Date(Date.now() - 18 * 60_000).toISOString(),
     reactionCount: 8,
-    commentCount: 2,
+    commentCount: 3,
     myReaction: "clap",
     comments: [
       {
@@ -89,6 +89,20 @@ const initialFeed: FeedPostView[] = [
         postId: "20000000-0000-4000-8000-000000000001",
         author: users[0],
         body: "Absolutely deserved — brilliant work!",
+        createdAt: ago(0),
+      },
+      {
+        id: "c2",
+        postId: "20000000-0000-4000-8000-000000000001",
+        author: users[1],
+        body: "You made a difficult launch feel effortless.",
+        createdAt: ago(0),
+      },
+      {
+        id: "c3",
+        postId: "20000000-0000-4000-8000-000000000001",
+        author: users[2],
+        body: "Thank you both. It was a real team effort!",
         createdAt: ago(0),
       },
     ],

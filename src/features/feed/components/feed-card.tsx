@@ -19,6 +19,8 @@ const reactionIcons: Record<ReactionType, string> = {
   love: "♥",
 };
 
+const defaultCommentCount = 2;
+
 function relative(iso: string) {
   const minutes = Math.max(1, Math.round((Date.now() - new Date(iso).getTime()) / 60_000));
 
@@ -55,7 +57,8 @@ function reactionClassName(selected: boolean) {
 export function FeedCard({ post }: { post: FeedPostView }) {
   const api = useApi();
   const queryClient = useQueryClient();
-  const [showComments, setShowComments] = useState(false);
+  const [commentsExpanded, setCommentsExpanded] = useState(false);
+  const [commentFormOpen, setCommentFormOpen] = useState(false);
   const [comment, setComment] = useState("");
 
   function patch(next: FeedPostView) {
@@ -115,7 +118,8 @@ export function FeedCard({ post }: { post: FeedPostView }) {
 
     patch({ ...post, comments: [...post.comments, created], commentCount: post.commentCount + 1 });
     setComment("");
-    setShowComments(true);
+    setCommentsExpanded(true);
+    setCommentFormOpen(true);
   }
 
   function resolveMediaUrl() {
@@ -131,11 +135,23 @@ export function FeedCard({ post }: { post: FeedPostView }) {
     return `${domain}/${post.media.objectKey}`;
   }
 
-  function toggleComments() {
-    setShowComments((value) => !value);
+  function toggleCommentForm() {
+    setCommentFormOpen((value) => !value);
+  }
+
+  function showMoreComments() {
+    setCommentsExpanded(true);
   }
 
   const mediaUrl = resolveMediaUrl();
+  let visibleComments = post.comments.slice(0, defaultCommentCount);
+
+  if (commentsExpanded) {
+    visibleComments = post.comments;
+  }
+
+  const hasMoreComments = post.comments.length > defaultCommentCount && !commentsExpanded;
+  const showCommentSection = visibleComments.length > 0 || commentFormOpen;
 
   return (
     <Surface as="article" className="post">
@@ -173,14 +189,14 @@ export function FeedCard({ post }: { post: FeedPostView }) {
           <Text as="span">{post.reactionCount}</Text>
         </div>
 
-        <Button variant="ghost" onClick={toggleComments}>
+        <Button variant="ghost" onClick={toggleCommentForm}>
           Comment · {post.commentCount}
         </Button>
       </div>
 
-      {showComments && (
+      {showCommentSection && (
         <div className="comments">
-          {post.comments.map((item) => (
+          {visibleComments.map((item) => (
             <div className="comment" key={item.id}>
               <Avatar initials={item.author.initials} size="small" />
               <div>
@@ -190,15 +206,23 @@ export function FeedCard({ post }: { post: FeedPostView }) {
             </div>
           ))}
 
-          <form onSubmit={submitComment}>
-            <Input
-              value={comment}
-              onChange={(event) => setComment(event.target.value)}
-              maxLength={1000}
-              placeholder="Write a comment…"
-            />
-            <Button type="submit">Post</Button>
-          </form>
+          {hasMoreComments && (
+            <Button variant="ghost" className="comments-more" onClick={showMoreComments}>
+              See more comments
+            </Button>
+          )}
+
+          {commentFormOpen && (
+            <form onSubmit={submitComment}>
+              <Input
+                value={comment}
+                onChange={(event) => setComment(event.target.value)}
+                maxLength={1000}
+                placeholder="Write a comment…"
+              />
+              <Button type="submit">Post</Button>
+            </form>
+          )}
         </div>
       )}
     </Surface>
