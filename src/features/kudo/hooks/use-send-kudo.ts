@@ -1,7 +1,9 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { BudgetView, FeedPostView, Page, SendKudoCommand } from "../types";
+import type { FeedPostView } from "@/features/feed/types";
+import type { Page } from "@/lib/api/shared-types";
+import type { BudgetView, SendKudoCommand } from "../types";
 import { useApi } from "@/providers/app-providers";
 
 export function useSendKudo() {
@@ -13,9 +15,19 @@ export function useSendKudo() {
       queryClient.setQueryData<Page<FeedPostView>>(["feed"], (old) => ({
         items: [post, ...(old?.items.filter((item) => item.id !== post.id) ?? [])],
       }));
-      queryClient.setQueryData<BudgetView>(["budget"], (old) => old
-        ? { ...old, spent: old.spent + post.points, remaining: old.remaining - post.points }
-        : old);
+      queryClient.setQueryData<BudgetView>(["budget"], (old) => updateBudget(old, post.points));
     },
   });
+}
+
+function updateBudget(old: BudgetView | undefined, points: number) {
+  if (!old) {
+    return old;
+  }
+
+  return {
+    ...old,
+    spent: old.spent + points,
+    remaining: old.remaining - points,
+  };
 }
