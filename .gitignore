@@ -5,6 +5,7 @@ node_modules/
 .next/
 .next-dev/
 out/
+.vercel/
 
 # TypeScript cache
 *.tsbuildinfo

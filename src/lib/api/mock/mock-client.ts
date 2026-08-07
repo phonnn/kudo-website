@@ -2,8 +2,7 @@ import type { ApiClient } from "@/lib/api/client.interface";
 import { ApiError } from "@/lib/errors/api-error";
 import type { FeedPostView, SendKudoCommand } from "@/features/kudo/types";
 
-const delay = (milliseconds = 250) =>
-  new Promise((resolve) => setTimeout(resolve, milliseconds));
+const delay = (milliseconds = 250) => new Promise((resolve) => setTimeout(resolve, milliseconds));
 
 const users = [
   { id: "u1", name: "Alex Morgan", initials: "AM" },
@@ -16,7 +15,8 @@ const initialFeed: FeedPostView[] = [
     id: "k1",
     sender: users[1],
     recipient: users[2],
-    message: "Thank you for jumping in to unblock the launch. Your calm ownership made a real difference.",
+    message:
+      "Thank you for jumping in to unblock the launch. Your calm ownership made a real difference.",
     points: 25,
     coreValue: "Own the outcome",
     createdAt: new Date(Date.now() - 18 * 60_000).toISOString(),
@@ -60,9 +60,27 @@ export class MockApiClient implements ApiClient {
   async getRedemptionHistory() {
     await delay(260);
     return [
-      { id: "r1", rewardName: "$10 Coffee voucher", points: 100, status: "fulfilled" as const, redeemedAt: new Date(Date.now() - 5 * 86_400_000).toISOString() },
-      { id: "r2", rewardName: "Team lunch credit", points: 75, status: "pending" as const, redeemedAt: new Date(Date.now() - 16 * 86_400_000).toISOString() },
-      { id: "r3", rewardName: "Charity donation", points: 60, status: "fulfilled" as const, redeemedAt: new Date(Date.now() - 42 * 86_400_000).toISOString() },
+      {
+        id: "r1",
+        rewardName: "$10 Coffee voucher",
+        points: 100,
+        status: "fulfilled" as const,
+        redeemedAt: new Date(Date.now() - 5 * 86_400_000).toISOString(),
+      },
+      {
+        id: "r2",
+        rewardName: "Team lunch credit",
+        points: 75,
+        status: "pending" as const,
+        redeemedAt: new Date(Date.now() - 16 * 86_400_000).toISOString(),
+      },
+      {
+        id: "r3",
+        rewardName: "Charity donation",
+        points: 60,
+        status: "fulfilled" as const,
+        redeemedAt: new Date(Date.now() - 42 * 86_400_000).toISOString(),
+      },
     ];
   }
 

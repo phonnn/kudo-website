@@ -16,10 +16,14 @@ export class HttpApiClient implements ApiClient {
   getMe = () => this.request<Awaited<ReturnType<ApiClient["getMe"]>>>("/me");
   getUsers = () => this.request<Awaited<ReturnType<ApiClient["getUsers"]>>>("/users");
   getBudget = () => this.request<Awaited<ReturnType<ApiClient["getBudget"]>>>("/budget");
-  getPointBalance = () => this.request<Awaited<ReturnType<ApiClient["getPointBalance"]>>>("/me/points");
-  getRedemptionHistory = () => this.request<Awaited<ReturnType<ApiClient["getRedemptionHistory"]>>>("/me/redemptions");
+  getPointBalance = () =>
+    this.request<Awaited<ReturnType<ApiClient["getPointBalance"]>>>("/me/points");
+  getRedemptionHistory = () =>
+    this.request<Awaited<ReturnType<ApiClient["getRedemptionHistory"]>>>("/me/redemptions");
   getFeed = (cursor?: string) =>
-    this.request<Awaited<ReturnType<ApiClient["getFeed"]>>>(`/feed${cursor ? `?cursor=${encodeURIComponent(cursor)}` : ""}`);
+    this.request<Awaited<ReturnType<ApiClient["getFeed"]>>>(
+      `/feed${cursor ? `?cursor=${encodeURIComponent(cursor)}` : ""}`,
+    );
   sendKudo = (command: SendKudoCommand, idempotencyKey: string) =>
     this.request<Awaited<ReturnType<ApiClient["sendKudo"]>>>("/kudos", {
       method: "POST",

@@ -13,9 +13,11 @@ export function useSendKudo() {
       queryClient.setQueryData<Page<FeedPostView>>(["feed"], (old) => ({
         items: [post, ...(old?.items.filter((item) => item.id !== post.id) ?? [])],
       }));
-      queryClient.setQueryData<BudgetView>(["budget"], (old) => old
-        ? { ...old, spent: old.spent + post.points, remaining: old.remaining - post.points }
-        : old);
+      queryClient.setQueryData<BudgetView>(["budget"], (old) =>
+        old
+          ? { ...old, spent: old.spent + post.points, remaining: old.remaining - post.points }
+          : old,
+      );
     },
   });
 }

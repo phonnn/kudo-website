@@ -1,8 +1,5 @@
 export type ErrorCode =
-  | "INSUFFICIENT_BUDGET"
-  | "SELF_RECOGNITION"
-  | "DUPLICATE_REQUEST"
-  | "INTERNAL";
+  "INSUFFICIENT_BUDGET" | "SELF_RECOGNITION" | "DUPLICATE_REQUEST" | "INTERNAL";
 
 export class ApiError extends Error {
   constructor(

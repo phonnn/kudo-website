@@ -6,8 +6,9 @@ let client: ApiClient | undefined;
 
 export function createApiClient(): ApiClient {
   if (client) return client;
-  client = process.env.NEXT_PUBLIC_API_MODE === "http"
-    ? new HttpApiClient(process.env.NEXT_PUBLIC_API_URL ?? "")
-    : new MockApiClient();
+  client =
+    process.env.NEXT_PUBLIC_API_MODE === "http"
+      ? new HttpApiClient(process.env.NEXT_PUBLIC_API_URL ?? "")
+      : new MockApiClient();
   return client;
 }

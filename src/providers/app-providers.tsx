@@ -16,12 +16,17 @@ export function useApi() {
 
 export function AppProviders({ children }: { children: ReactNode }) {
   const [api] = useState(createApiClient);
-  const [queryClient] = useState(() => new QueryClient({
-    defaultOptions: {
-      queries: { staleTime: 30_000, refetchOnWindowFocus: false },
-      mutations: { retry: (count, error) => error instanceof ApiError && error.retryable && count < 2 },
-    },
-  }));
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: { staleTime: 30_000, refetchOnWindowFocus: false },
+          mutations: {
+            retry: (count, error) => error instanceof ApiError && error.retryable && count < 2,
+          },
+        },
+      }),
+  );
 
   return (
     <ApiContext.Provider value={api}>
