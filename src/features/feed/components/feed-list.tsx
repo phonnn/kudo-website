@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import type { FeedPostView } from "@/features/feed/types";
 import type { Page } from "@/lib/api/shared-types";
@@ -14,15 +13,15 @@ export function FeedList() {
   const feed = useFeed();
   const api = useApi();
   const queryClient = useQueryClient();
-  const [fresh, setFresh] = useState(false);
 
   useEffect(() => {
     let disconnect: (() => void) | undefined;
+    let disposed = false;
 
     api
       .subscribeFeed((event) => {
         if (event.type === "post.published") {
-          setFresh(true);
+          void queryClient.invalidateQueries({ queryKey: ["feed"] });
           return;
         }
 
@@ -47,16 +46,19 @@ export function FeedList() {
         });
       })
       .then((stop) => {
+        if (disposed) {
+          stop();
+          return;
+        }
+
         disconnect = stop;
       });
 
-    return () => disconnect?.();
+    return () => {
+      disposed = true;
+      disconnect?.();
+    };
   }, [api, queryClient]);
-
-  async function refreshFeed() {
-    await feed.refetch();
-    setFresh(false);
-  }
 
   if (feed.isPending) {
     return <EmptyState>Loading recognition…</EmptyState>;
@@ -72,12 +74,6 @@ export function FeedList() {
 
   return (
     <>
-      {fresh && (
-        <Button variant="ghost" className="new-posts" onClick={refreshFeed}>
-          New recognition — refresh feed
-        </Button>
-      )}
-
       <div className="feed">
         {feed.data.items.map((post) => (
           <FeedCard key={post.id} post={post} />

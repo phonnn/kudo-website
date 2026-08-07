@@ -22,24 +22,35 @@ export function NotificationBell() {
   });
 
   useEffect(() => {
-    let stop: (() => void) | undefined;
+    let disconnect: (() => void) | undefined;
+    let disposed = false;
 
     api
       .subscribeNotifications((notification) => {
         queryClient.setQueryData<Page<NotificationView>>(["notifications"], (old) => {
           const currentItems = old?.items ?? [];
+          const itemsWithoutDuplicate = currentItems.filter((item) => {
+            return item.id !== notification.id;
+          });
 
           return {
-            items: [notification, ...currentItems],
+            ...old,
+            items: [notification, ...itemsWithoutDuplicate],
           };
         });
       })
-      .then((disconnect) => {
-        stop = disconnect;
+      .then((stop) => {
+        if (disposed) {
+          stop();
+          return;
+        }
+
+        disconnect = stop;
       });
 
     return () => {
-      stop?.();
+      disposed = true;
+      disconnect?.();
     };
   }, [api, queryClient]);
 
