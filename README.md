@@ -6,11 +6,13 @@ Next.js App Router frontend for the Good Job peer-recognition platform. The init
 
 ```bash
 nvm use
-npm install
+yarn install
 cp .env.example .env.local
-npm run dev
+yarn dev
 ```
 
-Open http://localhost:3000. Node 22.22.0 is pinned in `.nvmrc`.
+Open http://localhost:3001. The backend uses port 3000. Node 22.22.0 is pinned in `.nvmrc`.
 
 Set `NEXT_PUBLIC_API_MODE=http` and `NEXT_PUBLIC_API_URL` to swap to the HTTP provider when the backend is ready.
+
+The local `.env.local` is configured to use `http://localhost:3000`.
