@@ -9,28 +9,29 @@ import { Surface } from "@/components/ui/surface";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
+import { useToast } from "@/components/ui/toast-provider";
+import { RewardImage } from "./reward-image";
 
 export function RewardCatalog() {
   const api = useApi();
+  const { showToast } = useToast();
   const queryClient = useQueryClient();
   const rewards = useQuery({ queryKey: ["rewards"], queryFn: () => api.getRewards() });
   const balance = useQuery({ queryKey: ["points", "me"], queryFn: () => api.getPointBalance() });
   const [redeeming, setRedeeming] = useState<string | null>(null);
-  const [message, setMessage] = useState("");
   async function redeem(id: string) {
     setRedeeming(id);
-    setMessage("");
 
     try {
       const result = await api.redeemReward(id, crypto.randomUUID());
-      setMessage(`${result.rewardName} has been redeemed.`);
+      showToast(`${result.rewardName} has been redeemed.`, "success");
       await queryClient.invalidateQueries({ queryKey: ["points", "me"] });
       await queryClient.invalidateQueries({ queryKey: ["redemptions", "me"] });
     } catch (error) {
       if (error instanceof Error) {
-        setMessage(error.message);
+        showToast(error.message);
       } else {
-        setMessage("Could not redeem reward.");
+        showToast("Could not redeem reward.");
       }
     } finally {
       setRedeeming(null);
@@ -43,7 +44,6 @@ export function RewardCatalog() {
 
   return (
     <>
-      {message && <div className="reward-message">{message}</div>}
       <div className="reward-grid">
         {rewards.data?.map((reward) => {
           const affordable = (balance.data?.earned ?? 0) >= reward.costPoints;
@@ -65,7 +65,7 @@ export function RewardCatalog() {
 
           return (
             <Surface as="article" className="reward-card" key={reward.id}>
-              <div className="reward-art">{reward.icon}</div>
+              <RewardImage imageUrl={reward.imageUrl} name={reward.name} fallback={reward.icon} />
               <Eyebrow>{availabilityLabel}</Eyebrow>
               <Heading>{reward.name}</Heading>
               <Text>{reward.description}</Text>

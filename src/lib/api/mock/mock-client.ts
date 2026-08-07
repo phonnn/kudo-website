@@ -42,6 +42,7 @@ const rewards: RewardView[] = [
     description: "A $10 voucher for your favorite local café.",
     costPoints: 100,
     stock: null,
+    imageUrl: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&h=400&fit=crop",
     icon: "☕",
   },
   {
@@ -50,6 +51,7 @@ const rewards: RewardView[] = [
     description: "Put 175 points toward lunch with your team.",
     costPoints: 175,
     stock: 8,
+    imageUrl: "https://images.unsplash.com/photo-1547592180-85f173990554?w=600&h=400&fit=crop",
     icon: "🍜",
   },
   {
@@ -58,6 +60,7 @@ const rewards: RewardView[] = [
     description: "Take a well-earned additional day to recharge.",
     costPoints: 500,
     stock: 2,
+    imageUrl: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&h=400&fit=crop",
     icon: "🌿",
   },
   {
@@ -66,6 +69,7 @@ const rewards: RewardView[] = [
     description: "Turn recognition into a donation to a cause.",
     costPoints: 60,
     stock: null,
+    imageUrl: "https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?w=600&h=400&fit=crop",
     icon: "♥",
   },
 ];

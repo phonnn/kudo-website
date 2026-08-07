@@ -6,14 +6,19 @@ export class HttpRewardClient implements RewardClient {
   constructor(private readonly transport: HttpTransport) {}
 
   async getRewards() {
-    const items =
-      await this.transport.request<
-        Array<{ id: string; name: string; costPoints: number; stock: number | null }>
-      >("/rewards");
+    const items = await this.transport.request<
+      Array<{
+        id: string;
+        name: string;
+        description: string;
+        costPoints: number;
+        stock: number | null;
+        imageUrl: string | null;
+      }>
+    >("/rewards");
 
     return items.map((item) => ({
       ...item,
-      description: "A reward for work worth celebrating.",
       icon: "★",
     }));
   }

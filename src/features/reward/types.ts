@@ -12,5 +12,6 @@ export type RewardView = {
   description: string;
   costPoints: number;
   stock: number | null;
+  imageUrl: string | null;
   icon: string;
 };
