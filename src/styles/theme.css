@@ -1,0 +1,35 @@
+:root {
+  /* Brand palette inspired by the Good Job logo. */
+  --theme-primary: #e71672;
+  --theme-primary-hover: #c70e65;
+  --theme-secondary: #7b12c7;
+  --theme-accent: #f2358d;
+  --theme-gradient: linear-gradient(135deg, var(--theme-secondary), var(--theme-primary));
+
+  /* Neutral palette. */
+  --theme-text: #2d1832;
+  --theme-text-subtle: #756778;
+  --theme-background: #fff8fc;
+  --theme-surface: #ffffff;
+  --theme-surface-subtle: #f9edf5;
+  --theme-border: #eadbe7;
+  --theme-border-strong: #d8bfd2;
+
+  /* Feedback palette. */
+  --theme-danger: #a92f54;
+  --theme-danger-surface: #f9dfe8;
+  --theme-warning: #795314;
+  --theme-warning-surface: #fff0c9;
+  --theme-success: #5b267a;
+  --theme-success-surface: #eee1f7;
+
+  /* Component tokens. */
+  --theme-on-primary: #ffffff;
+  --theme-avatar: #f3c1dc;
+  --theme-avatar-text: #72114f;
+  --theme-disabled: #ded4dc;
+  --theme-disabled-text: #817681;
+  --theme-overlay: rgb(45 24 50 / 86%);
+  --theme-header: rgb(255 255 255 / 90%);
+  --theme-shadow: rgb(83 18 91 / 8%);
+}

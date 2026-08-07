@@ -11,5 +11,9 @@ export function useProfile() {
     queryKey: ["redemptions", "me"],
     queryFn: () => api.getRedemptionHistory(),
   });
-  return { user, points, redemptions };
+  const history = useQuery({
+    queryKey: ["point-history", "me"],
+    queryFn: () => api.getPointHistory(),
+  });
+  return { user, points, redemptions, history };
 }

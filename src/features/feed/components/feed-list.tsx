@@ -1,35 +1,97 @@
 "use client";
 
+import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { EmptyState } from "@/components/ui/empty-state";
+import type { FeedPostView } from "@/features/feed/types";
+import type { Page } from "@/lib/api/shared-types";
+import { useApi } from "@/providers/app-providers";
+import { FeedCard } from "./feed-card";
 import { useFeed } from "../hooks/use-feed";
-
-const relative = (iso: string) => {
-  const minutes = Math.max(1, Math.round((Date.now() - new Date(iso).getTime()) / 60_000));
-  return minutes < 60 ? `${minutes}m ago` : `${Math.round(minutes / 60)}h ago`;
-};
 
 export function FeedList() {
   const feed = useFeed();
-  if (feed.isPending) return <div className="card empty">Loading recognition…</div>;
-  if (feed.isError) return <div className="card empty">Could not load the feed.</div>;
-  if (!feed.data.items.length)
-    return <div className="card empty">Be the first to recognize someone.</div>;
+  const api = useApi();
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    let disconnect: (() => void) | undefined;
+    let disposed = false;
+
+    api
+      .subscribeFeed((event) => {
+        if (event.type === "post.published") {
+          queryClient.setQueryData<Page<FeedPostView>>(["feed"], (old) => {
+            if (!old) {
+              return { items: [event.post] };
+            }
+
+            const previousItems = old.items.filter((post) => {
+              return post.id !== event.post.id;
+            });
+
+            return {
+              ...old,
+              items: [event.post, ...previousItems],
+            };
+          });
+          return;
+        }
+
+        queryClient.setQueryData<Page<FeedPostView>>(["feed"], (old) => {
+          if (!old) {
+            return old;
+          }
+
+          const items = old.items.map((post) => {
+            if (post.id !== event.postId) {
+              return post;
+            }
+
+            return {
+              ...post,
+              commentCount: event.commentCount ?? post.commentCount,
+              reactionCount: event.reactionCount ?? post.reactionCount,
+            };
+          });
+
+          return { ...old, items };
+        });
+      })
+      .then((stop) => {
+        if (disposed) {
+          stop();
+          return;
+        }
+
+        disconnect = stop;
+      });
+
+    return () => {
+      disposed = true;
+      disconnect?.();
+    };
+  }, [api, queryClient]);
+
+  if (feed.isPending) {
+    return <EmptyState>Loading recognition…</EmptyState>;
+  }
+
+  if (feed.isError) {
+    return <EmptyState>Could not load the feed.</EmptyState>;
+  }
+
+  if (!feed.data.items.length) {
+    return <EmptyState>Be the first to recognize someone.</EmptyState>;
+  }
 
   return (
-    <div className="feed">
-      {feed.data.items.map((post) => (
-        <article className="card post" key={post.id}>
-          <div className="post-head">
-            <span className="avatar">{post.sender.initials}</span>
-            <div>
-              <strong>{post.sender.name}</strong> recognized <strong>{post.recipient.name}</strong>
-              <small>{relative(post.createdAt)}</small>
-            </div>
-            <span className="points">+{post.points}</span>
-          </div>
-          <p>{post.message}</p>
-          <span className="value">{post.coreValue}</span>
-        </article>
-      ))}
-    </div>
+    <>
+      <div className="feed">
+        {feed.data.items.map((post) => (
+          <FeedCard key={post.id} post={post} />
+        ))}
+      </div>
+    </>
   );
 }

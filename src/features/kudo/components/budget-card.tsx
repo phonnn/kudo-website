@@ -2,22 +2,29 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useApi } from "@/providers/app-providers";
+import { Surface } from "@/components/ui/surface";
+import { Eyebrow } from "@/components/ui/eyebrow";
+import { Text } from "@/components/ui/text";
 
 export function BudgetCard() {
   const api = useApi();
   const budget = useQuery({ queryKey: ["budget"], queryFn: () => api.getBudget() });
-  const percent = budget.data ? (budget.data.remaining / budget.data.total) * 100 : 0;
+  let percent = 0;
+
+  if (budget.data) {
+    percent = (budget.data.remaining / budget.data.total) * 100;
+  }
   return (
-    <aside className="card budget">
-      <div className="eyebrow">Monthly giving budget</div>
+    <Surface as="aside" className="budget">
+      <Eyebrow>Monthly giving budget</Eyebrow>
       <div className="budget-number">
         {budget.data?.remaining ?? "—"}
-        <span> points left</span>
+        <Text as="span"> points left</Text>
       </div>
       <div className="track">
         <div style={{ width: `${percent}%` }} />
       </div>
-      <small>Resets at the start of next month</small>
-    </aside>
+      <Text as="small">Resets at the start of next month</Text>
+    </Surface>
   );
 }
