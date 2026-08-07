@@ -45,9 +45,17 @@ src/
     user/                      User balance and history
   lib/
     api/
-      client.interface.ts      API contract used by features
-      http/http-client.ts      Backend HTTP and SSE adapter
-      mock/mock-client.ts      In-memory development adapter
+      auth/                     Authentication contract and HTTP adapter
+      feed/                     Feed contract and HTTP adapter
+      kudo/                     Recognition contract and HTTP adapter
+      notification/             Notification contract and HTTP adapter
+      reward/                   Reward contract and HTTP adapter
+      user/                     User contract and HTTP adapter
+      client.interface.ts      Composed API contract used by features
+      shared-types.ts          Transport-level shared models
+      http/http-client.ts      HTTP client composition
+      http/http-transport.ts   Fetch, authorization, errors, and SSE
+      mock/mock-client.ts      Shared in-memory development adapter
       provider.ts              Selects and creates the adapter
     errors/                    Typed API errors
   providers/                   API context and TanStack Query provider
@@ -77,20 +85,21 @@ property while keeping styling and usage consistent:
 
 ## API boundary
 
-Feature code depends on the `ApiClient` interface, not directly on `fetch`,
-`EventSource`, `HttpApiClient`, or `MockApiClient`.
+Feature code depends on small domain interfaces composed into `ApiClient`, not directly on
+`fetch`, `EventSource`, the HTTP domain clients, or `MockApiClient`.
 
 ```text
 Page
   -> Feature component
     -> Feature hook or query
-      -> ApiClient
-        -> HttpApiClient or MockApiClient
+      -> Domain client interface
+        -> Composed ApiClient
+          -> HTTP domain client or MockApiClient
 ```
 
 `createApiClient` selects the implementation using `NEXT_PUBLIC_API_MODE`:
 
-- `http`: use `HttpApiClient` and `NEXT_PUBLIC_API_URL`
+- `http`: compose the HTTP domain clients using `NEXT_PUBLIC_API_URL`
 - Any other value: use `MockApiClient`
 
 The configured client is created once by `AppProviders` and exposed through `useApi()`.
@@ -104,7 +113,8 @@ NEXT_PUBLIC_API_MODE=http
 NEXT_PUBLIC_API_URL=http://localhost:3000
 ```
 
-`HttpApiClient` is responsible for:
+The HTTP domain clients are responsible for endpoint-specific request and response mapping.
+The shared `HttpTransport` is responsible for:
 
 - Adding the bearer access token to authenticated requests
 - Mapping backend responses into frontend view models
@@ -125,7 +135,7 @@ stored under these browser-storage keys:
 - `goodjob.refreshToken`
 - `goodjob.user`
 
-The access token is attached as a bearer token by `HttpApiClient`. The refresh token is
+The access token is attached as a bearer token by `HttpTransport`. The refresh token is
 stored, but automatic token refresh is not currently implemented.
 
 Authentication is client-side. Consequently, protected pages render through client
@@ -163,7 +173,7 @@ when they unmount.
 
 ## Error handling
 
-`HttpApiClient` parses backend error responses into `ApiError`. Application behavior should
+`HttpTransport` parses backend error responses into `ApiError`. Application behavior should
 use stable error codes; messages are display text and must not be parsed for control flow.
 
 TanStack Query retries a failed mutation only when it receives a retryable `ApiError`, with
