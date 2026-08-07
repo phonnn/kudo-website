@@ -1,6 +1,4 @@
 "use client";
-/* eslint-disable @next/next/no-img-element -- local blob previews are not optimizable assets */
-
 import { useRef, useState, type FormEvent } from "react";
 import { ApiError } from "@/lib/errors/api-error";
 import { useApi } from "@/providers/app-providers";
@@ -17,6 +15,7 @@ import { Eyebrow } from "@/components/ui/eyebrow";
 import { Heading } from "@/components/ui/heading";
 import { useToast } from "@/components/ui/toast-provider";
 import { TeammatePicker } from "./teammate-picker";
+import { ImagePicker } from "./image-picker";
 
 const tags: Array<{ value: Tag; label: string }> = [
   { value: "teamwork", label: "Better together" },
@@ -168,19 +167,7 @@ export function SendKudoForm() {
         />
       </Field>
       <Field className="media-picker" label="Photo" hint="optional">
-        <Input
-          type="file"
-          accept="image/*"
-          onChange={(event) => chooseFile(event.target.files?.[0] ?? null)}
-        />
-        {preview && (
-          <div className="media-preview">
-            <img src={preview} alt="Upload preview" />
-            <Button variant="ghost" onClick={() => chooseFile(null)}>
-              Remove
-            </Button>
-          </div>
-        )}
+        <ImagePicker fileName={file?.name} preview={preview} onChange={chooseFile} />
       </Field>
       {uploadError && <FormError>{uploadError}</FormError>}
       {errorMessage && <FormError>{errorMessage}</FormError>}
