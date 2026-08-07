@@ -144,6 +144,7 @@ export class MockApiClient implements ApiClient {
     {
       id: "n1",
       type: "kudo_received",
+      senderName: "Maya Chen",
       message: "Maya sent you 25 points for Ownership.",
       readAt: null,
       createdAt: new Date(Date.now() - 9 * 60_000).toISOString(),
@@ -151,6 +152,7 @@ export class MockApiClient implements ApiClient {
     {
       id: "n2",
       type: "comment",
+      senderName: "Sam Rivera",
       message: "Sam commented on your recognition post.",
       readAt: null,
       createdAt: new Date(Date.now() - 70 * 60_000).toISOString(),
@@ -158,6 +160,7 @@ export class MockApiClient implements ApiClient {
     {
       id: "n3",
       type: "reaction",
+      senderName: "Maya Chen",
       message: "Maya celebrated your post.",
       readAt: ago(1),
       createdAt: ago(1),
@@ -282,7 +285,7 @@ export class MockApiClient implements ApiClient {
     };
     this.remaining -= command.points;
     this.feed.unshift(post);
-    this.feedListeners.forEach((listener) => listener({ type: "post.published", postId: post.id }));
+    this.feedListeners.forEach((listener) => listener({ type: "post.published", post }));
     return post;
   }
 

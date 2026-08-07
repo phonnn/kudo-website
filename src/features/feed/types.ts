@@ -26,9 +26,14 @@ export type FeedPostView = {
   comments: CommentView[];
 };
 
-export type RealtimeFeedEvent = {
-  type: "post.published" | "post.updated";
-  postId: string;
-  commentCount?: number;
-  reactionCount?: number;
-};
+export type RealtimeFeedEvent =
+  | {
+      type: "post.published";
+      post: FeedPostView;
+    }
+  | {
+      type: "post.updated";
+      postId: string;
+      commentCount?: number;
+      reactionCount?: number;
+    };

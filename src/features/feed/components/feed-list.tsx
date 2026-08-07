@@ -21,7 +21,20 @@ export function FeedList() {
     api
       .subscribeFeed((event) => {
         if (event.type === "post.published") {
-          void queryClient.invalidateQueries({ queryKey: ["feed"] });
+          queryClient.setQueryData<Page<FeedPostView>>(["feed"], (old) => {
+            if (!old) {
+              return { items: [event.post] };
+            }
+
+            const previousItems = old.items.filter((post) => {
+              return post.id !== event.post.id;
+            });
+
+            return {
+              ...old,
+              items: [event.post, ...previousItems],
+            };
+          });
           return;
         }
 

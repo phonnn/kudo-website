@@ -13,7 +13,7 @@ type FeedResponse = {
     commentCount: number;
     reactionCount: number;
     createdAt: string;
-    myReaction: ReactionType | null;
+    myReaction?: ReactionType | null;
     media: { objectKey: string; domain: string } | null;
     kudo: {
       recipientId: string;
@@ -78,10 +78,18 @@ export class HttpFeedClient implements FeedClient {
   subscribeFeed(listener: (event: RealtimeFeedEvent) => void) {
     return this.transport.eventSource("/kudos/events", {
       "post.published": (data) => {
-        listener({ type: "post.published", ...(data as { postId: string }) });
+        listener({
+          type: "post.published",
+          post: toFeedPost(data as FeedItemWithKudo),
+        });
       },
       "post.updated": (data) => {
-        listener({ type: "post.updated", ...(data as Omit<RealtimeFeedEvent, "type">) });
+        const update = data as Extract<RealtimeFeedEvent, { type: "post.updated" }>;
+
+        listener({
+          ...update,
+          type: "post.updated",
+        });
       },
     });
   }
@@ -114,7 +122,7 @@ function toFeedPost(item: FeedItemWithKudo): FeedPostView {
     media: item.media ?? undefined,
     commentCount: item.commentCount,
     reactionCount: item.reactionCount,
-    myReaction: item.myReaction,
+    myReaction: item.myReaction ?? null,
     comments: [],
   };
 }
