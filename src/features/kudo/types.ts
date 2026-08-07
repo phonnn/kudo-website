@@ -1,17 +1,9 @@
-export type UserView = {
-  id: string;
-  name: string;
-  initials: string;
-};
+export type Tag = "teamwork" | "ownership" | "innovation" | "customer_focus";
 
-export type FeedPostView = {
-  id: string;
-  sender: UserView;
-  recipient: UserView;
-  message: string;
-  points: number;
-  coreValue: string;
-  createdAt: string;
+export type MediaView = {
+  objectKey: string;
+  domain: string;
+  previewUrl?: string;
 };
 
 export type BudgetView = {
@@ -20,25 +12,17 @@ export type BudgetView = {
   total: number;
 };
 
-export type PointBalanceView = {
-  earned: number;
-  lifetimeEarned: number;
-  lifetimeRedeemed: number;
-};
-
-export type RedemptionView = {
-  id: string;
-  rewardName: string;
-  points: number;
-  status: "pending" | "fulfilled" | "cancelled";
-  redeemedAt: string;
+export type PresignedUploadView = {
+  url: string;
+  fields: Record<string, string>;
+  objectKey: string;
+  domain: string;
 };
 
 export type SendKudoCommand = {
   recipientId: string;
   message: string;
   points: number;
-  coreValue: string;
+  tag: Tag;
+  media?: MediaView;
 };
-
-export type Page<T> = { items: T[]; nextCursor?: string };
