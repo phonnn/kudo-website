@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Surface } from "@/components/ui/surface";
 import { Text } from "@/components/ui/text";
+import { useToast } from "@/components/ui/toast-provider";
 import type { FeedPostView, ReactionType } from "@/features/feed/types";
 import type { Page } from "@/lib/api/shared-types";
 import { useApi } from "@/providers/app-providers";
@@ -56,6 +57,7 @@ function reactionClassName(selected: boolean) {
 
 export function FeedCard({ post }: { post: FeedPostView }) {
   const api = useApi();
+  const { showToast } = useToast();
   const queryClient = useQueryClient();
   const [commentsExpanded, setCommentsExpanded] = useState(false);
   const [commentFormOpen, setCommentFormOpen] = useState(false);
@@ -100,8 +102,9 @@ export function FeedCard({ post }: { post: FeedPostView }) {
 
     try {
       await api.setReaction(post.id, nextType);
-    } catch {
+    } catch (reason) {
       patch(post);
+      showToast(actionErrorMessage(reason, "Could not update your reaction."));
     }
   }
 
@@ -114,12 +117,20 @@ export function FeedCard({ post }: { post: FeedPostView }) {
       return;
     }
 
-    const created = await api.addComment(post.id, body);
+    try {
+      const created = await api.addComment(post.id, body);
 
-    patch({ ...post, comments: [...post.comments, created], commentCount: post.commentCount + 1 });
-    setComment("");
-    setCommentsExpanded(true);
-    setCommentFormOpen(true);
+      patch({
+        ...post,
+        comments: [...post.comments, created],
+        commentCount: post.commentCount + 1,
+      });
+      setComment("");
+      setCommentsExpanded(true);
+      setCommentFormOpen(true);
+    } catch (reason) {
+      showToast(actionErrorMessage(reason, "Could not post your comment."));
+    }
   }
 
   function resolveMediaUrl() {
@@ -227,4 +238,12 @@ export function FeedCard({ post }: { post: FeedPostView }) {
       )}
     </Surface>
   );
+}
+
+function actionErrorMessage(reason: unknown, fallback: string) {
+  if (reason instanceof Error) {
+    return reason.message;
+  }
+
+  return fallback;
 }

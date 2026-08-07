@@ -15,6 +15,7 @@ import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { Heading } from "@/components/ui/heading";
+import { useToast } from "@/components/ui/toast-provider";
 import { TeammatePicker } from "./teammate-picker";
 
 const tags: Array<{ value: Tag; label: string }> = [
@@ -26,17 +27,22 @@ const tags: Array<{ value: Tag; label: string }> = [
 
 export function SendKudoForm() {
   const api = useApi();
+  const { showToast } = useToast();
   const sendKudo = useSendKudo();
   const [message, setMessage] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
   const formRef = useRef<HTMLFormElement>(null);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     let media: MediaView | undefined;
+
+    setUploadError("");
+
     try {
       if (file) {
         setUploading(true);
@@ -58,20 +64,44 @@ export function SendKudoForm() {
         },
         {
           onSuccess: () => {
+            if (preview) {
+              URL.revokeObjectURL(preview);
+            }
+
             setMessage("");
             setFile(null);
             setPreview(null);
             formRef.current?.reset();
           },
+          onError: (reason) => {
+            if (reason instanceof Error) {
+              showToast(reason.message);
+            } else {
+              showToast("Could not send recognition.");
+            }
+          },
         },
       );
+    } catch (reason) {
+      if (reason instanceof Error) {
+        setUploadError(reason.message);
+        showToast(reason.message);
+      } else {
+        setUploadError("Could not upload the image.");
+        showToast("Could not upload the image.");
+      }
     } finally {
       setUploading(false);
     }
   }
 
   function chooseFile(next: File | null) {
+    if (preview) {
+      URL.revokeObjectURL(preview);
+    }
+
     setFile(next);
+    setUploadError("");
 
     if (next) {
       setPreview(URL.createObjectURL(next));
@@ -152,6 +182,7 @@ export function SendKudoForm() {
           </div>
         )}
       </Field>
+      {uploadError && <FormError>{uploadError}</FormError>}
       {errorMessage && <FormError>{errorMessage}</FormError>}
       <Button type="submit" disabled={sendKudo.isPending || uploading}>
         {submitLabel}

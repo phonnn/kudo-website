@@ -6,6 +6,7 @@ import type { ApiClient } from "@/lib/api/client.interface";
 import { createApiClient } from "@/lib/api/provider";
 import { ApiError } from "@/lib/errors/api-error";
 import { AuthGate } from "@/features/auth/components/auth-gate";
+import { ToastProvider } from "@/components/ui/toast-provider";
 
 const ApiContext = createContext<ApiClient | null>(null);
 
@@ -34,7 +35,9 @@ export function AppProviders({ children }: { children: ReactNode }) {
   return (
     <ApiContext.Provider value={api}>
       <QueryClientProvider client={queryClient}>
-        <AuthGate>{children}</AuthGate>
+        <ToastProvider>
+          <AuthGate>{children}</AuthGate>
+        </ToastProvider>
       </QueryClientProvider>
     </ApiContext.Provider>
   );

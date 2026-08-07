@@ -10,9 +10,11 @@ import type { Page } from "@/lib/api/shared-types";
 import { useApi } from "@/providers/app-providers";
 import { NotificationItem } from "./notification-item";
 import { Text } from "@/components/ui/text";
+import { useToast } from "@/components/ui/toast-provider";
 
 export function NotificationBell() {
   const api = useApi();
+  const { showToast } = useToast();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
 
@@ -66,7 +68,17 @@ export function NotificationBell() {
       return;
     }
 
-    await api.markNotificationRead(item.id);
+    try {
+      await api.markNotificationRead(item.id);
+    } catch (reason) {
+      if (reason instanceof Error) {
+        showToast(reason.message);
+      } else {
+        showToast("Could not mark the notification as read.");
+      }
+
+      return;
+    }
 
     queryClient.setQueryData<Page<NotificationView>>(["notifications"], (old) => {
       if (!old) {

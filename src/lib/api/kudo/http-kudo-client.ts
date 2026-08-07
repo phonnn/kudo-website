@@ -21,6 +21,15 @@ export class HttpKudoClient implements KudoClient {
   }
 
   async sendKudo(command: SendKudoCommand, idempotencyKey: string) {
+    let media: { objectKey: string; domain: string } | undefined;
+
+    if (command.media) {
+      media = {
+        objectKey: command.media.objectKey,
+        domain: command.media.domain,
+      };
+    }
+
     const created = await this.transport.request<{ postId: string }>("/kudos", {
       method: "POST",
       headers: { "idempotency-key": idempotencyKey },
@@ -29,7 +38,7 @@ export class HttpKudoClient implements KudoClient {
         points: command.points,
         tag: command.tag,
         description: command.message,
-        media: command.media,
+        media,
       }),
     });
     const sender = await this.users.getMe();
