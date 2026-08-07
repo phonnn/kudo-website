@@ -1,7 +1,6 @@
 "use client";
 /* eslint-disable @next/next/no-img-element -- local blob previews are not optimizable assets */
 
-import { useQuery } from "@tanstack/react-query";
 import { useRef, useState, type FormEvent } from "react";
 import { ApiError } from "@/lib/errors/api-error";
 import { useApi } from "@/providers/app-providers";
@@ -16,6 +15,7 @@ import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { Heading } from "@/components/ui/heading";
+import { TeammatePicker } from "./teammate-picker";
 
 const tags: Array<{ value: Tag; label: string }> = [
   { value: "teamwork", label: "Better together" },
@@ -26,7 +26,6 @@ const tags: Array<{ value: Tag; label: string }> = [
 
 export function SendKudoForm() {
   const api = useApi();
-  const users = useQuery({ queryKey: ["users"], queryFn: () => api.getUsers() });
   const sendKudo = useSendKudo();
   const [message, setMessage] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -105,24 +104,18 @@ export function SendKudoForm() {
       <Heading>Send a good job</Heading>
       <div className="form-grid">
         <Field label="To">
-          <Select name="recipientId" required defaultValue="">
-            <option value="" disabled>
-              Choose a teammate
-            </option>
-            {users.data?.slice(1).map((user) => (
-              <option key={user.id} value={user.id}>
-                {user.name}
-              </option>
-            ))}
-          </Select>
+          <TeammatePicker />
         </Field>
         <Field label="Points">
-          <Select name="points" defaultValue="10">
-            <option>10</option>
-            <option>15</option>
-            <option>25</option>
-            <option>50</option>
-          </Select>
+          <Input
+            name="points"
+            type="number"
+            min={10}
+            max={50}
+            step={1}
+            defaultValue={10}
+            required
+          />
         </Field>
       </div>
       <Field label="Tag">

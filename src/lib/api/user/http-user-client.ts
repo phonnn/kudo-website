@@ -20,8 +20,32 @@ export class HttpUserClient implements UserClient {
     throw new ApiError("INTERNAL", "Sign in to continue.");
   }
 
-  async getUsers() {
-    return [await this.getMe()];
+  async getUsers(search?: string) {
+    let path = "/users?limit=10";
+
+    if (search) {
+      path += `&search=${encodeURIComponent(search)}`;
+    }
+
+    const page = await this.transport.request<{
+      items: Array<{
+        id: string;
+        name: string;
+        createdAt: string;
+      }>;
+      nextCursor: string | null;
+    }>(path);
+
+    return page.items.map((user) => ({
+      id: user.id,
+      name: user.name,
+      initials: user.name
+        .split(" ")
+        .map((part) => part[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase(),
+    }));
   }
 
   async getPointBalance() {

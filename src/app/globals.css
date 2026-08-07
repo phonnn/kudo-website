@@ -185,10 +185,66 @@ textarea {
   grid-template-columns: 1fr 105px;
   gap: 12px;
 }
+.combobox {
+  position: relative;
+}
+.combobox-control {
+  position: relative;
+}
+.combobox-control input {
+  padding-right: 42px;
+}
+.combobox-control button {
+  position: absolute;
+  top: 50%;
+  right: 5px;
+  width: 32px;
+  height: 32px;
+  transform: translateY(-50%);
+  color: var(--theme-text-subtle);
+}
+.combobox-popover {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 6px);
+  right: 0;
+  left: 0;
+  max-height: 240px;
+  overflow-y: auto;
+  padding: 6px;
+  border: 1px solid var(--theme-border);
+  border-radius: 12px;
+  background: var(--theme-surface);
+  box-shadow: 0 12px 30px var(--theme-shadow);
+}
+.combobox-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 38px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  color: var(--theme-text);
+  text-align: left;
+}
+.combobox-option.active,
+.combobox-option:hover {
+  background: var(--theme-surface-subtle);
+}
+.combobox-option.selected {
+  color: var(--theme-primary);
+  font-weight: 700;
+}
+.combobox-empty {
+  padding: 10px;
+  color: var(--theme-text-subtle);
+  font-size: 13px;
+}
 button {
   cursor: pointer;
 }
-.composer button {
+.composer > .ui-button-primary {
   width: 100%;
   border: 0;
   border-radius: 9px;
@@ -197,10 +253,10 @@ button {
   padding: 13px;
   font-weight: 800;
 }
-.composer button:hover {
+.composer > .ui-button-primary:hover {
   background: var(--theme-primary-hover);
 }
-.composer button:disabled {
+.composer > .ui-button-primary:disabled {
   opacity: 0.6;
 }
 .error {

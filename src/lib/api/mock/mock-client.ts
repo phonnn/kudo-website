@@ -168,9 +168,20 @@ export class MockApiClient implements ApiClient {
     await delay();
     return this.me;
   }
-  async getUsers() {
+  async getUsers(search?: string) {
     await delay(120);
-    return users;
+
+    const teammates = users.filter((user) => user.id !== this.me.id);
+
+    if (!search) {
+      return teammates.slice(0, 10);
+    }
+
+    const normalizedSearch = search.trim().toLowerCase();
+
+    return teammates
+      .filter((user) => user.name.toLowerCase().includes(normalizedSearch))
+      .slice(0, 10);
   }
   async login(command: AuthCommand) {
     await delay(400);
