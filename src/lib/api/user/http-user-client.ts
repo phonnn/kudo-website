@@ -63,10 +63,92 @@ export class HttpUserClient implements UserClient {
   }
 
   async getPointHistory() {
-    return [];
+    const page = await this.transport.request<{
+      items: Array<{
+        id: number;
+        delta: number;
+        ledgerType: "giving_spend" | "earn" | "redeem_spend" | "reversal" | "adjustment";
+        refType: "kudo" | "redemption";
+        refId: string;
+        createdAt: string;
+      }>;
+      nextCursor: string | null;
+    }>("/balance/history?limit=50");
+
+    return page.items.map((item) => ({
+      id: String(item.id),
+      label: pointHistoryLabel(item.ledgerType),
+      delta: item.delta,
+      type: pointHistoryType(item.ledgerType, item.delta),
+      createdAt: item.createdAt,
+    }));
   }
 
   async getRedemptionHistory() {
-    return [];
+    const page = await this.transport.request<{
+      items: Array<{
+        id: string;
+        rewardId: string;
+        rewardName: string;
+        costPoints: number;
+        status: "confirmed" | "failed";
+        createdAt: string;
+      }>;
+      nextCursor: string | null;
+    }>("/rewards/redemptions?limit=50");
+
+    return page.items.map((item) => {
+      let status: "fulfilled" | "cancelled" = "cancelled";
+
+      if (item.status === "confirmed") {
+        status = "fulfilled";
+      }
+
+      return {
+        id: item.id,
+        rewardName: item.rewardName,
+        points: item.costPoints,
+        status,
+        redeemedAt: item.createdAt,
+      };
+    });
   }
+}
+
+type LedgerType = "giving_spend" | "earn" | "redeem_spend" | "reversal" | "adjustment";
+
+function pointHistoryLabel(ledgerType: LedgerType) {
+  if (ledgerType === "giving_spend") {
+    return "Recognition sent";
+  }
+
+  if (ledgerType === "earn") {
+    return "Recognition received";
+  }
+
+  if (ledgerType === "redeem_spend") {
+    return "Reward redeemed";
+  }
+
+  if (ledgerType === "reversal") {
+    return "Point reversal";
+  }
+
+  return "Point adjustment";
+}
+
+function pointHistoryType(ledgerType: LedgerType, delta: number) {
+  if (ledgerType === "giving_spend") {
+    return "given" as const;
+  }
+
+  if (ledgerType === "redeem_spend") {
+    return "redeemed" as const;
+  }
+
+  if (delta < 0) {
+    return "redeemed" as const;
+  }
+
+  return "earned" as const;
 }
