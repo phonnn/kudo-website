@@ -2,8 +2,11 @@ import { ApiError } from "@/lib/errors/api-error";
 
 export class HttpTransport {
   private accessToken = "";
+  private readonly baseUrl: string;
 
-  constructor(private readonly baseUrl: string) {
+  constructor(baseUrl: string) {
+    this.baseUrl = baseUrl.replace(/\/+$/, "");
+
     if (typeof window !== "undefined") {
       this.accessToken = localStorage.getItem("goodjob.accessToken") ?? "";
     }

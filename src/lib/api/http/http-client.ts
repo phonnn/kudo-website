@@ -26,6 +26,7 @@ export function createHttpApiClient(baseUrl: string): ApiClient {
     getPointHistory: user.getPointHistory.bind(user),
     getRedemptionHistory: user.getRedemptionHistory.bind(user),
     getFeed: feed.getFeed.bind(feed),
+    getComments: feed.getComments.bind(feed),
     addComment: feed.addComment.bind(feed),
     setReaction: feed.setReaction.bind(feed),
     subscribeFeed: feed.subscribeFeed.bind(feed),

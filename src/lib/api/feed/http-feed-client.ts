@@ -46,6 +46,37 @@ export class HttpFeedClient implements FeedClient {
     };
   }
 
+  async getComments(postId: string, limit?: number) {
+    let path = `/kudos/${postId}/comments`;
+
+    if (limit) {
+      path += `?limit=${limit}`;
+    }
+
+    const comments = await this.transport.request<
+      Array<{
+        id: string;
+        postId: string;
+        authorId: string;
+        authorName: string;
+        body: string;
+        createdAt: string;
+      }>
+    >(path);
+
+    return comments.map((comment) => ({
+      id: comment.id,
+      postId: comment.postId,
+      author: {
+        id: comment.authorId,
+        name: comment.authorName,
+        initials: comment.authorName.slice(0, 2).toUpperCase(),
+      },
+      body: comment.body,
+      createdAt: comment.createdAt,
+    }));
+  }
+
   async addComment(postId: string, body: string) {
     const result = await this.transport.request<{
       id: string;

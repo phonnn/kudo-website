@@ -2,14 +2,14 @@
 /* eslint-disable @next/next/no-img-element -- image hosts are supplied dynamically by the storage provider */
 
 import { useState, type FormEvent } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Surface } from "@/components/ui/surface";
 import { Text } from "@/components/ui/text";
 import { useToast } from "@/components/ui/toast-provider";
-import type { FeedPostView, ReactionType } from "@/features/feed/types";
+import type { CommentView, FeedPostView, ReactionType } from "@/features/feed/types";
 import type { Page } from "@/lib/api/shared-types";
 import { useApi } from "@/providers/app-providers";
 
@@ -62,6 +62,12 @@ export function FeedCard({ post }: { post: FeedPostView }) {
   const [commentsExpanded, setCommentsExpanded] = useState(false);
   const [commentFormOpen, setCommentFormOpen] = useState(false);
   const [comment, setComment] = useState("");
+
+  const commentsQuery = useQuery({
+    queryKey: ["comments", post.id],
+    queryFn: () => api.getComments(post.id),
+    enabled: post.commentCount > 0,
+  });
 
   function patch(next: FeedPostView) {
     queryClient.setQueryData<Page<FeedPostView>>(["feed"], (old) => {
@@ -120,11 +126,11 @@ export function FeedCard({ post }: { post: FeedPostView }) {
     try {
       const created = await api.addComment(post.id, body);
 
-      patch({
-        ...post,
-        comments: [...post.comments, created],
-        commentCount: post.commentCount + 1,
-      });
+      queryClient.setQueryData<CommentView[]>(["comments", post.id], (old) => [
+        ...(old ?? []),
+        created,
+      ]);
+      patch({ ...post, commentCount: post.commentCount + 1 });
       setComment("");
       setCommentsExpanded(true);
       setCommentFormOpen(true);
@@ -155,14 +161,15 @@ export function FeedCard({ post }: { post: FeedPostView }) {
   }
 
   const mediaUrl = resolveMediaUrl();
-  let visibleComments = post.comments.slice(0, defaultCommentCount);
+  const loadedComments = commentsQuery.data ?? [];
+  let visibleComments = loadedComments.slice(-defaultCommentCount);
 
   if (commentsExpanded) {
-    visibleComments = post.comments;
+    visibleComments = loadedComments;
   }
 
-  const hasMoreComments = post.comments.length > defaultCommentCount && !commentsExpanded;
-  const showCommentSection = visibleComments.length > 0 || commentFormOpen;
+  const hasMoreComments = post.commentCount > defaultCommentCount && !commentsExpanded;
+  const showCommentSection = post.commentCount > 0 || commentFormOpen;
 
   return (
     <Surface as="article" className="post">
@@ -211,7 +218,10 @@ export function FeedCard({ post }: { post: FeedPostView }) {
             <div className="comment" key={item.id}>
               <Avatar initials={item.author.initials} size="small" />
               <div>
-                <Text as="strong">{item.author.name}</Text>
+                <div className="comment-meta">
+                  <Text as="strong">{item.author.name}</Text>
+                  <Text as="small">{relative(item.createdAt)}</Text>
+                </div>
                 <Text>{item.body}</Text>
               </div>
             </div>
