@@ -1,6 +1,8 @@
 # Good Job web
 
-Next.js App Router frontend for the Good Job peer-recognition platform. The initial app is client-first and uses an in-memory API implementation, following `WEB-ARCHITECTURE.md`.
+Next.js App Router frontend for the Good Job peer-recognition platform. The initial app is client-first and uses an in-memory API implementation.
+
+For the design decisions behind this (API provider abstraction, feature structure, state/data-fetching approach, trade-offs), see [WEB-ARCHITECTURE.md](./WEB-ARCHITECTURE.md).
 
 ## Run locally
 

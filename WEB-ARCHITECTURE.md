@@ -9,7 +9,10 @@ to `kudo-service` through HTTP and server-sent events (SSE).
 - Next.js 15 with the App Router
 - React 19 and TypeScript
 - TanStack Query for remote state
-- CSS in `src/app/globals.css`
+- Hand-written CSS in `src/app/globals.css` and `src/styles/theme.css`, using custom
+  properties for the design tokens (colors, spacing). Tailwind is an installed dependency
+  (`@import "tailwindcss"`) but its utility classes are not used in components — it
+  currently contributes only its reset layer.
 - Yarn 1.22.22
 - Node.js 22
 
@@ -28,6 +31,14 @@ The frontend runs on `http://localhost:3001`. The backend runs on
 
 `AuthGate` protects every route except `/login` and `/register`. It checks the access
 token in browser storage and redirects unauthenticated users to `/login`.
+
+## Layout and navigation
+
+`AppShell` renders `AppHeader` and a footer around each authenticated page. `AppHeader`
+shows the primary nav (Feed, Rewards, My profile) inline above an 800px viewport width.
+Below that breakpoint the inline nav hides and a hamburger toggle (`.menu-toggle`) opens
+the same links in a dropdown panel. This is CSS-driven (`src/app/globals.css`); the header
+component always renders both, visibility switches on viewport width.
 
 ## Source structure
 
@@ -113,6 +124,12 @@ NEXT_PUBLIC_API_MODE=http
 NEXT_PUBLIC_API_URL=http://localhost:3000
 ```
 
+The backend allow-lists origins for CORS via a static `CORS_ORIGIN` env var (exact string
+match, no wildcard or subdomain matching). Vercel preview deployments get a new random
+`*.vercel.app` URL per branch/PR, so previews cannot reach the real backend unless that
+exact URL is added to `CORS_ORIGIN` — there's no way to allow "any preview" today. Only the
+production frontend URL is expected to be allow-listed by default.
+
 The HTTP domain clients are responsible for endpoint-specific request and response mapping.
 The shared `HttpTransport` is responsible for:
 
@@ -126,6 +143,16 @@ The shared `HttpTransport` is responsible for:
 
 Features must not duplicate these transport concerns.
 
+### Media trust model
+
+Uploads and reads are asymmetric. Uploading media is authenticated: the backend issues a
+presigned POST (`presignMedia`) that the client uploads directly to storage. Reading media
+back is not authenticated at all — `FeedCard` renders `<img src="{domain}/{objectKey}">` as
+a plain GET, with no token or signed URL. This only works because the storage bucket is
+configured for public anonymous reads (`mc anonymous set download`); a private bucket would
+make every existing recognition image 403. There is currently no per-object access control
+on reads — anyone with an object URL can view it.
+
 ## Authentication and session storage
 
 Login and registration use `/auth/login` and `/auth/register`. The accepted session is
@@ -138,6 +165,12 @@ stored under these browser-storage keys:
 The access token is attached as a bearer token by `HttpTransport`. The refresh token is
 stored, but automatic token refresh is not currently implemented.
 
+`AuthGate` only checks that `goodjob.accessToken` is *present* in browser storage, not
+that it's valid. A stale or garbage value (e.g. left over from a different API mode)
+is treated as an active session; the first authenticated request then fails with a
+401, which `HttpTransport` handles by clearing storage and redirecting to `/login`. So
+recovery is one failed request, not an immediate check.
+
 Authentication is client-side. Consequently, protected pages render through client
 components after `AuthGate` verifies browser storage.
 
@@ -149,13 +182,15 @@ client with a 30-second stale time and disables refetch-on-window-focus.
 Current query areas include:
 
 - Feed
+- Comments, fetched only once a post has at least one comment
 - Giving budget
 - Notifications
 - Rewards
 - User balances and history
 
 Mutations update or invalidate the relevant cache. Feed reactions use an optimistic cache
-update and restore the previous post when the request fails.
+update and restore the previous post when the request fails. Posting a comment optimistically
+appends to that post's comments cache entry rather than refetching.
 
 ## Realtime updates
 
@@ -215,6 +250,8 @@ when matching backend endpoints are available:
 - `getRedemptionHistory()` returns an empty list.
 - Lifetime redeemed and lifetime earned totals are partially derived from the balance
   response.
+- `getComments()` is capped at the backend's most recent 20 comments per post; there is no
+  pagination past that, so "See more comments" plateaus at 20 on posts with more.
 
 These limitations belong in the HTTP adapter. UI components should continue using the
 `ApiClient` contract so backend completion does not require component rewrites.
