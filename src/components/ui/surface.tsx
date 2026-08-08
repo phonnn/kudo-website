@@ -1,6 +1,6 @@
 import type { HTMLAttributes, ReactNode } from "react";
 
-type SurfaceElement = "div" | "section" | "article" | "aside";
+type SurfaceElement = "div" | "section" | "article" | "aside" | "nav";
 
 interface SurfaceProps extends HTMLAttributes<HTMLElement> {
   as?: SurfaceElement;

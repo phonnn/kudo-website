@@ -255,6 +255,16 @@ export class MockApiClient implements ApiClient {
     await delay(300);
     return { items: [...this.feed] };
   }
+  async getComments(postId: string, limit = 20) {
+    await delay(150);
+    const post = this.feed.find((item) => item.id === postId);
+
+    if (!post) {
+      return [];
+    }
+
+    return post.comments.slice(-limit);
+  }
 
   async sendKudo(command: SendKudoCommand, idempotencyKey: string) {
     await delay(420);
