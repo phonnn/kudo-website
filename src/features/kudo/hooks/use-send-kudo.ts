@@ -6,11 +6,17 @@ import type { Page } from "@/lib/api/shared-types";
 import type { BudgetView, SendKudoCommand } from "../types";
 import { useApi } from "@/providers/app-providers";
 
+export interface SendKudoVariables {
+  command: SendKudoCommand;
+  idempotencyKey: string;
+}
+
 export function useSendKudo() {
   const api = useApi();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (command: SendKudoCommand) => api.sendKudo(command, crypto.randomUUID()),
+    mutationFn: ({ command, idempotencyKey }: SendKudoVariables) =>
+      api.sendKudo(command, idempotencyKey),
     onSuccess: (post) => {
       queryClient.setQueryData<Page<FeedPostView>>(["feed"], (old) => ({
         items: [post, ...(old?.items.filter((item) => item.id !== post.id) ?? [])],

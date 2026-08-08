@@ -55,11 +55,14 @@ export function SendKudoForm() {
       }
       sendKudo.mutate(
         {
-          recipientId: String(data.get("recipientId")),
-          message,
-          points: Number(data.get("points")),
-          tag: String(data.get("tag")) as Tag,
-          media,
+          command: {
+            recipientId: String(data.get("recipientId")),
+            message,
+            points: Number(data.get("points")),
+            tag: String(data.get("tag")) as Tag,
+            media,
+          },
+          idempotencyKey: crypto.randomUUID(),
         },
         {
           onSuccess: () => {
